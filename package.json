@@ -20,9 +20,7 @@
   "homepage": "https://github.com/prototype109/webauth-iii-challenge#readme",
   "dependencies": {
     "bcryptjs": "^2.4.3",
-    "connect-session-knex": "^1.5.0",
     "express": "^4.17.1",
-    "express-session": "^1.17.0",
     "jsonwebtoken": "^8.5.1",
     "knex": "^0.20.4",
     "sqlite3": "^4.1.1"
