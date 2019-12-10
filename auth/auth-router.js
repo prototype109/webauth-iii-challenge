@@ -1,6 +1,8 @@
 const express = require("express");
 const bcrypt = require("bcryptjs");
 const db = require("./auth-model");
+const jwt = require("jsonwebtoken");
+const secret = require("../secret/secret");
 const router = express.Router();
 
 router.post("/register", async (req, res) => {
@@ -19,5 +21,32 @@ router.post("/register", async (req, res) => {
     res.status(500).json(error);
   }
 });
+
+router.post("/login", (req, res) => {
+  const { username, password } = req.body;
+
+  try {
+    const user = db.getUser(username);
+    if (user.length && bcrypt.compareSync(password, user[0].password)) {
+      const token = generateToken(user[0]);
+      req.headers.authorization = token;
+      res.status(200).json({ message: "successfully logged in" });
+    } else {
+      res.status(401).json({ message: "You shall not pass!" });
+    }
+  } catch (error) {
+    res.status(500).json(error);
+  }
+});
+
+function generateToken(user) {
+  const payload = {
+    sub: user.id
+  };
+  const options = {
+    expiresIn: "1h"
+  };
+  return jwt.sign(payload, secret.jwtSecret, options);
+}
 
 module.exports = router;
