@@ -3,6 +3,7 @@ const bcrypt = require("bcryptjs");
 const db = require("./auth-model");
 const jwt = require("jsonwebtoken");
 const secret = require("../secret/secret");
+const restricted = require("./restricted-middleware");
 const router = express.Router();
 
 router.post("/register", async (req, res) => {
@@ -11,7 +12,7 @@ router.post("/register", async (req, res) => {
   password = hash;
 
   try {
-    const user = await db.addUser({ username, password });
+    const user = await db.addUser({ username: username, password: password });
     if (user.length) {
       res.status(200).json({ message: "successfully registered user" });
     } else {
@@ -22,18 +23,27 @@ router.post("/register", async (req, res) => {
   }
 });
 
-router.post("/login", (req, res) => {
+router.post("/login", async (req, res) => {
   const { username, password } = req.body;
 
   try {
-    const user = db.getUser(username);
+    const user = await db.getUser(username);
     if (user.length && bcrypt.compareSync(password, user[0].password)) {
       const token = generateToken(user[0]);
       req.headers.authorization = token;
-      res.status(200).json({ message: "successfully logged in" });
+      res.status(200).json({ message: "successfully logged in", token: token });
     } else {
       res.status(401).json({ message: "You shall not pass!" });
     }
+  } catch (error) {
+    res.status(500).json(error);
+  }
+});
+
+router.get("/users", restricted, async (req, res) => {
+  try {
+    const users = await db.getUsers();
+    res.status(200).json(users);
   } catch (error) {
     res.status(500).json(error);
   }

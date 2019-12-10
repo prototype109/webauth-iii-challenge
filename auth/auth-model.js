@@ -2,13 +2,18 @@ const User = require("../data/dbConfig");
 
 module.exports = {
   addUser,
-  getUser
+  getUser,
+  getUsers
 };
 
 function addUser(user) {
-  return User("users").insert(user);
+  return User("user").insert(user);
 }
 
 function getUser(user) {
-  return User("users").where("username", user);
+  return User("user").where("username", user);
+}
+
+function getUsers() {
+  return User("user");
 }
